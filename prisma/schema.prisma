@@ -21,9 +21,11 @@ model Student {
   receiptStatus  ReceiptStatus @default(PENDING)
   offerLetterUrl String?
   createdAt      DateTime      @default(now())
+  notification   String?
+
+  // Relations
   class10        Class10Marks?
   class12        Class12Marks?
-   notification    String? 
 }
 
 model Class10Marks {
