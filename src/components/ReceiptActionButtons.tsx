@@ -38,16 +38,20 @@ export default function ReceiptActionButtons({ studentId }: { studentId: string 
   return (
     <div className="flex gap-4 mt-3">
       <Button
+        size="sm"
         variant="secondary"
         onClick={() => handleReceiptDecision('VERIFIED')}
         disabled={loading}
+        className="px-3"
       >
         Accept
       </Button>
       <Button
+        size="sm"
         variant="destructive"
         onClick={() => handleReceiptDecision('REJECTED')}
         disabled={loading}
+        className="px-3"
       >
         Reject
       </Button>

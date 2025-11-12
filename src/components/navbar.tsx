@@ -42,8 +42,8 @@ export default function Navbar() {
 
     fetchStudent();
 
-    // Poll every 10s to pick up notifications pushed by admin actions
-    const id = setInterval(fetchStudent, 10000);
+  // Poll every 3s to pick up notifications pushed by admin actions faster
+  const id = setInterval(fetchStudent, 3000);
 
     return () => {
       mounted = false;
@@ -399,8 +399,8 @@ export default function Navbar() {
                     </motion.div>
                   )}
 
-                  {/* Accept Seat: show when seat not decided */}
-                  {student.seatAccepted == null && (
+                  {/* Accept Seat: show when seat not decided AND when it's actually a seat/offer notification or a seat is allotted */}
+                  {student.seatAccepted == null && (student.seatAllotted || student.offerLetterUrl || /seat|offer/i.test(student.notification || '')) && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}

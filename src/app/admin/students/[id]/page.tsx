@@ -1,4 +1,3 @@
-
 import { notFound } from "next/navigation";
 import {
   GraduationCap,
@@ -10,6 +9,7 @@ import {
   ClipboardList,
   CheckCircle2,
   XCircle,
+  Check,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,8 +18,9 @@ import Navbar from "@/components/adminNavbar";
 import SeatAllotmentForm from "@/components/SeatAllotmentForm";
 import Image from "next/image";
 import ReceiptActionButtons from "@/components/ReceiptActionButtons";
+import MarksheetActionButtons from '@/components/MarksheetActionButtons';
 import OfferLetterUpload from "@/components/OfferLetterUpload";
-
+import { Button } from "@/components/ui/button";
 
 export default async function StudentDetailPage({
   params,
@@ -27,21 +28,38 @@ export default async function StudentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+  // If BASE_URL is not configured, show a helpful message instead of silently using localhost
+  if (!BASE_URL) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen p-6 sm:p-10 bg-background text-foreground max-w-4xl mx-auto flex items-center justify-center">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="text-lg">Configuration required</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                The application is missing a required configuration: <code>NEXT_PUBLIC_BASE_URL</code>.
+                Please set <code>NEXT_PUBLIC_BASE_URL</code> to your site's public URL in your environment variables and restart the server.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
 
   const res = await fetch(`${BASE_URL}/api/students/${id}`, {
     cache: "no-store",
     next: { revalidate: 0 },
   });
 
-  if (!res.ok) {
-    return notFound();
-  }
+  if (!res.ok) return notFound();
 
   const student = await res.json();
-
-
-
   return (
     <>
       <Navbar />
@@ -70,10 +88,6 @@ export default async function StudentDetailPage({
 
             <Separator />
 
-           
-
-            <Separator />
-
             <div className="space-y-3">
               <p className="flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-muted-foreground" />
@@ -85,80 +99,114 @@ export default async function StudentDetailPage({
               </p>
               <p className="flex items-center gap-2">
                 <ClipboardList className="w-5 h-5 text-muted-foreground" />
-                Seat Allotted: {
-                  student.seatAllotted ? (
-                    <Badge variant="secondary" className="text-green-600 border-green-300">
-                      {student.seatAllotted}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-yellow-600 border-yellow-300">
-                      Not Allotted
-                    </Badge>
-                  )
-                }
+                Seat Allotted:{" "}
+                {student.seatAllotted ? (
+                  <Badge variant="secondary" className="text-green-600 border-green-300">
+                    {student.seatAllotted}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-yellow-600 border-yellow-300">
+                    Not Allotted
+                  </Badge>
+                )}
               </p>
               <p className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-muted-foreground" />
-                Seat Accepted: {
-                  student.seatAccepted ? (
-                    <Badge variant="secondary" className="text-green-600 border-green-300">
-                      Yes
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-red-600 border-red-300">
-                      No
-                    </Badge>
-                  )
-                }
+                Seat Accepted:{" "}
+                {student.seatAccepted ? (
+                  <Badge variant="secondary" className="text-green-600 border-green-300">
+                    Yes
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-red-600 border-red-300">
+                    No
+                  </Badge>
+                )}
               </p>
 
-  {student.receiptUrl && (
-  <div className="space-y-2 mt-4">
-    <p className="text-muted-foreground text-sm">Uploaded Receipt:</p>
-    <Image
-      src={student.receiptUrl}
-      alt="Payment Receipt"
-      width={400}
-      height={300}
-      className="rounded-md border shadow-md"
-    />
+              {/* RECEIPT SECTION */}
+              {student.receiptUrl && (
+                <div className="space-y-2 mt-4">
+                  <p className="text-muted-foreground text-sm">Uploaded Receipt:</p>
+                  <Image
+                    src={student.receiptUrl}
+                    alt="Payment Receipt"
+                    width={400}
+                    height={300}
+                    className="rounded-md border shadow-md"
+                  />
+                  {student.receiptStatus === "PENDING" && (
+                    <ReceiptActionButtons studentId={student.id} />
+                  )}
+                </div>
+              )}
 
-    {/* Action Buttons */}
-   {student.receiptStatus === 'PENDING' && (
-  <ReceiptActionButtons studentId={student.id} />
-)}
-  </div>
-)}
+              <p className="flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-muted-foreground" />
+                Receipt Status:
+                <Badge
+                  variant="secondary"
+                  className={
+                    student.receiptStatus === "VERIFIED"
+                      ? "text-green-600 border-green-300"
+                      : student.receiptStatus === "REJECTED"
+                      ? "text-red-600 border-red-300"
+                      : "text-yellow-600 border-yellow-300"
+                  }
+                >
+                  {student.receiptStatus}
+                </Badge>
+              </p>
 
-       
-           <p className="flex items-center gap-2">
-  <FileCheck className="w-5 h-5 text-muted-foreground" />
-  Receipt Status:
-  <Badge
-    variant="secondary"
-    className={
-      student.receiptStatus === 'VERIFIED'
-        ? 'text-green-600 border-green-300'
-        : student.receiptStatus === 'REJECTED'
-        ? 'text-red-600 border-red-300'
-        : 'text-yellow-600 border-yellow-300'
-    }
-  >
-    {student.receiptStatus}
-  </Badge>
-</p>
-{student.receiptStatus === "VERIFIED" && (
-  <OfferLetterUpload studentId={student.id} />
-)}
+              {student.receiptStatus === "VERIFIED" && (
+                <OfferLetterUpload studentId={student.id} />
+              )}
 
+              {/* ✅ MARKSHEET SECTION */}
+              {student.marksheetUrl && (
+                <div className="space-y-2 mt-6">
+                  <p className="text-muted-foreground text-sm">Uploaded 12th Marksheet:</p>
+                  <Image
+                    src={student.marksheetUrl}
+                    alt="12th Marksheet"
+                    width={400}
+                    height={300}
+                    className="rounded-md border shadow-md"
+                  />
 
-              <Separator/>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="flex items-center gap-2">
+                      <FileCheck className="w-5 h-5 text-muted-foreground" />
+                      Marksheet Status:
+                      <Badge
+                        variant="secondary"
+                        className={
+                          student.marksStatus === "VERIFIED"
+                            ? "text-green-600 border-green-300"
+                            : student.marksStatus === "REJECTED"
+                            ? "text-red-600 border-red-300"
+                            : "text-yellow-600 border-yellow-300"
+                        }
+                      >
+                        {student.marksStatus}
+                      </Badge>
+                    </p>
+
+                    {student.marksStatus === "PENDING" && (
+                      <MarksheetActionButtons studentId={student.id} />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
               <div className="pt-4">
-    <h3 className="text-xl font-semibold text-primary mb-3 flex items-center gap-2">
-      Allot Seat
-    </h3>
-    <SeatAllotmentForm studentId={student.id} />
-  </div>
+                <h3 className="text-xl font-semibold text-primary mb-3 flex items-center gap-2">
+                  Allot Seat
+                </h3>
+                <SeatAllotmentForm studentId={student.id} />
+              </div>
             </div>
           </CardContent>
         </Card>

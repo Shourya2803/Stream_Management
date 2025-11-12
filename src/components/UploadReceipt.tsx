@@ -20,10 +20,10 @@ export default function UploadReceipt({ student }: { student: any }) {
       // 1. Upload to Cloudinary directly
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'default'); // 🔁 Replace with actual preset
+      formData.append('upload_preset', 'default'); 
 
       const cloudinaryRes = await fetch(
-        'https://api.cloudinary.com/v1_1/dj9elwflm/image/upload', // 🔁 Replace with actual cloud name
+        'https://api.cloudinary.com/v1_1/dj9elwflm/image/upload', //place with actual cloud name
         {
           method: 'POST',
           body: formData,

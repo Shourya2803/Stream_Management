@@ -21,6 +21,7 @@ export default function Form() {
     physics12: string;
     chemistry12: string;
     maths12: string;
+    marksheetUrl: string; // <-- Added marksheet upload URL field
   };
 
   const [formData, setFormData] = useState<FormData>({
@@ -36,11 +37,14 @@ export default function Form() {
     social10: "",
     physics12: "",
     chemistry12: "",
-    maths12: ""
+    maths12: "",
+    marksheetUrl: "",
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [uploading, setUploading] = useState(false);
 
+  // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name as keyof FormData;
     const value = e.target.value;
@@ -48,6 +52,38 @@ export default function Form() {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // File upload to Cloudinary
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "student_uploads"); // Replace with your Cloudinary preset
+
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dj9elwflm/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.secure_url) {
+        setFormData((prev) => ({ ...prev, marksheetUrl: data.secure_url }));
+        toast.success("Marksheet uploaded successfully!");
+      } else {
+        toast.error("Upload failed!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error uploading marksheet!");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Validation
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
@@ -56,7 +92,6 @@ export default function Form() {
     if (!formData.phone) {
       newErrors.phone = "Required";
     } else {
-      // phone must be digits only (integer) and non-negative
       const phoneTrim = formData.phone.trim();
       if (!/^[0-9]+$/.test(phoneTrim)) {
         newErrors.phone = "Phone number must contain digits only";
@@ -87,10 +122,13 @@ export default function Form() {
       }
     });
 
+    if (!formData.marksheetUrl) newErrors.marksheetUrl = "Please upload your Class 12 Marksheet";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Submit
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -116,7 +154,8 @@ export default function Form() {
           social10: "",
           physics12: "",
           chemistry12: "",
-          maths12: ""
+          maths12: "",
+          marksheetUrl: "",
         });
       } else {
         const errorData = await res.json();
@@ -132,9 +171,12 @@ export default function Form() {
     }
   };
 
+  // Helper for input
   const renderInput = (name: keyof FormData, label: string, type = "text", placeholder?: string) => (
     <div className="space-y-1">
-      <Label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-slate-200">{label} <span className="text-red-500">*</span></Label>
+      <Label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-slate-200">
+        {label} <span className="text-red-500">*</span>
+      </Label>
       <Input
         name={name}
         type={type}
@@ -183,7 +225,7 @@ export default function Form() {
           </CardContent>
         </Card>
 
-        {/* Class 12 Marks */}
+        {/* Class 12 Marks + Marksheet Upload */}
         <Card className="border border-gray-200 shadow-sm bg-white dark:bg-slate-800 dark:border-slate-700">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-800 dark:text-slate-100">Class 12 Marks</CardTitle>
@@ -193,6 +235,17 @@ export default function Form() {
             {renderInput("chemistry12", "Chemistry", "number")}
             {renderInput("maths12", "Mathematics", "number")}
           </CardContent>
+          <CardContent className="mt-4">
+            <Label className="text-sm font-medium text-gray-700 dark:text-slate-200">
+              Upload Class 12 Marksheet <span className="text-red-500">*</span>
+            </Label>
+            <Input type="file" accept="image/*,application/pdf" onChange={handleFileUpload} className="mt-2" />
+            {uploading && <p className="text-blue-500 text-xs mt-1">Uploading...</p>}
+            {formData.marksheetUrl && (
+              <p className="text-green-500 text-xs mt-1">Uploaded Successfully ✓</p>
+            )}
+            {errors.marksheetUrl && <p className="text-red-500 text-xs">{errors.marksheetUrl}</p>}
+          </CardContent>
         </Card>
 
         {/* Submit Button */}
@@ -201,8 +254,9 @@ export default function Form() {
             onClick={handleSubmit}
             type="button"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm transition shadow-sm"
+            disabled={uploading}
           >
-            Submit Application
+            {uploading ? "Uploading..." : "Submit Application"}
           </Button>
         </div>
       </form>
