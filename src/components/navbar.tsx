@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { UserButton } from "@clerk/nextjs";
 import { Bell, Menu, X, BookOpen } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,25 +14,41 @@ export default function Navbar() {
   const [showNotification, setShowNotification] = useState(false);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchStudent = async () => {
       try {
         const res = await fetch("/api/students/me");
         if (res.ok) {
           const data = await res.json();
+          if (!mounted) return;
+          // Detect new notification and show toast once
+          if (data?.notification && data.notification !== student?.notification) {
+            toast.info(data.notification);
+          }
           setStudent(data);
-          // console.log("Student data:", data); // Debug log
         } else {
           console.error("Failed to fetch student:", res.status, res.statusText);
         }
       } catch (error) {
         console.error("Error fetching student:", error);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
+
     fetchStudent();
+
+    // Poll every 10s to pick up notifications pushed by admin actions
+    const id = setInterval(fetchStudent, 10000);
+
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
   }, []);
 
   const handleAccept = async () => {
@@ -52,11 +69,12 @@ export default function Navbar() {
         const updated = await res.json();
         setStudent(updated);
         setShowNotification(false);
-        // console.log("Seat accepted successfully:", updated);
+        toast.success('Seat accepted');
       } else {
-        console.error("Failed to accept seat:", res.status, res.statusText);
-        const errorData = await res.json();
-        console.error("Error details:", errorData);
+        let errorData = null;
+        try { errorData = await res.json(); } catch (_) { /* ignore */ }
+        console.error("Failed to accept seat:", res.status, res.statusText, errorData);
+        toast.error(errorData?.error || 'Failed to accept seat');
       }
     } catch (error) {
       console.error("Error accepting seat:", error);
@@ -64,6 +82,38 @@ export default function Navbar() {
       setAccepting(false);
     }
   };
+  const handleReject = async () => {
+  if (!student || rejecting) return;
+  
+  setRejecting(true);
+  try {
+    const res = await fetch(`/api/students/${student.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        seatAccepted: false, // Set the boolean field to false
+        notification: null,
+      }),
+    });
+
+    if (res.ok) {
+      const updated = await res.json();
+      setStudent(updated);
+      setShowNotification(false);
+      toast.success('Seat rejected');
+    } else {
+      let errorData = null;
+      try { errorData = await res.json(); } catch (_) { /* ignore */ }
+      console.error("Failed to reject seat:", res.status, res.statusText, errorData);
+      toast.error(errorData?.error || 'Failed to reject seat');
+    }
+  } catch (error) {
+    console.error("Error rejecting seat:", error);
+  } finally {
+    setRejecting(false);
+  }
+};
+
 
   const handleDownloadPDF = async () => {
     if (!student?.offerLetterUrl) return;
@@ -349,8 +399,8 @@ export default function Navbar() {
                     </motion.div>
                   )}
 
-                  {/* Accept Seat */}
-                  {!student.seatAccepted && (
+                  {/* Accept Seat: show when seat not decided */}
+                  {student.seatAccepted == null && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -363,6 +413,14 @@ export default function Navbar() {
                         disabled={accepting}
                       >
                         {accepting ? "Accepting..." : "Accept Seat"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+                        onClick={handleReject}
+                        disabled={rejecting}
+                      >
+                        {rejecting ? "Rejecting..." : "Reject Seat"}
                       </Button>
                     </motion.div>
                   )}

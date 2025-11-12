@@ -38,24 +38,33 @@ export async function PATCH(
 ) {
   const { id: studentId } = await context.params;
 
-  const { receiptStatus, notification } = await req.json();
+  const payload = await req.json();
+  const { receiptStatus, notification } = payload;
+
+  console.debug(`[receipt PATCH] id=${studentId} payload=`, payload);
 
   if (!['REJECTED', 'VERIFIED', 'PENDING'].includes(receiptStatus)) {
     return new Response('Invalid receipt status', { status: 400 });
   }
 
   try {
-    const updated = await prisma.student.update({
-      where: { id: studentId },
-      data: {
-        receiptStatus,
-        notification: notification || null,
-      },
-    });
+    // Fetch current row to decide cascading changes
+    const current = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!current) return new Response('Student not found', { status: 404 });
 
-    return new Response(JSON.stringify(updated), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const data: Record<string, any> = {
+      receiptStatus,
+      notification: notification || null,
+    };
+
+    // Do NOT auto-accept seat when receipt is verified. Receipt verification
+    // is a separate step that should occur after a seat is accepted. Only
+    // update receiptStatus and notification here.
+
+    const updated = await prisma.student.update({ where: { id: studentId }, data });
+    console.debug(`[receipt PATCH] updated student id=${studentId}`, { seatAccepted: updated.seatAccepted, seatStatus: updated.seatStatus, receiptStatus: updated.receiptStatus });
+
+    return new Response(JSON.stringify(updated), { headers: { 'Content-Type': 'application/json' } });
   } catch (err) {
     console.error('Failed to update receipt status:', err);
     return new Response('Internal Server Error', { status: 500 });

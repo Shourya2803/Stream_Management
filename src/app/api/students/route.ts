@@ -31,7 +31,12 @@ export async function GET() {
         total10,
         total12,
         branchChoice1: student.branchChoice1,
+        branchChoice2: student.branchChoice2,
         seatAccepted: student.seatAccepted,
+        seatStatus: student.seatStatus,
+        // include receipt fields so the frontend can filter by uploaded/verified receipts
+        receiptUrl: student.receiptUrl,
+        receiptStatus: student.receiptStatus,
       };
     });
 

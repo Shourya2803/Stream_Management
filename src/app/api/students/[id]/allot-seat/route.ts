@@ -19,6 +19,10 @@ export async function POST(
       where: { id },
       data: {
         seatAllotted: seat,
+        // When re-allotting a seat, reset acceptance to pending so the student
+        // can accept/reject the newly allotted seat again.
+        seatAccepted: null,
+        seatStatus: "PENDING",
         notification: `🎉 You have been allotted a seat in ${seat}`,
       },
     });

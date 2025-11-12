@@ -11,7 +11,8 @@ export default function Form() {
     name: string;
     email: string;
     phone: string;
-    branch: string;
+    branchChoice1: string;
+    branchChoice2: string;
     english10: string;
     maths10: string;
     science10: string;
@@ -26,7 +27,8 @@ export default function Form() {
     name: "",
     email: "",
     phone: "",
-    branch: "",
+    branchChoice1: "",
+    branchChoice2: "",
     english10: "",
     maths10: "",
     science10: "",
@@ -42,7 +44,6 @@ export default function Form() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.name as keyof FormData;
     const value = e.target.value;
-
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
@@ -52,8 +53,23 @@ export default function Form() {
 
     if (!formData.name) newErrors.name = "Required";
     if (!formData.email) newErrors.email = "Required";
-    if (!formData.phone) newErrors.phone = "Required";
-    if (!formData.branch) newErrors.branch = "Required";
+    if (!formData.phone) {
+      newErrors.phone = "Required";
+    } else {
+      // phone must be digits only (integer) and non-negative
+      const phoneTrim = formData.phone.trim();
+      if (!/^[0-9]+$/.test(phoneTrim)) {
+        newErrors.phone = "Phone number must contain digits only";
+      } else {
+        const phoneNum = parseInt(phoneTrim, 10);
+        if (isNaN(phoneNum) || phoneNum < 0) {
+          newErrors.phone = "Phone number must be a positive integer";
+        }
+      }
+    }
+
+    if (!formData.branchChoice1) newErrors.branchChoice1 = "Required";
+    if (!formData.branchChoice2) newErrors.branchChoice2 = "Required";
 
     const class10Fields: (keyof FormData)[] = ["english10", "maths10", "science10", "hindi10", "social10"];
     class10Fields.forEach((field) => {
@@ -85,43 +101,30 @@ export default function Form() {
         body: JSON.stringify(formData),
       });
 
-     if (res.ok) {
-      toast.success("Form submitted successfully!");
-          setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        branch: "",
-        english10: "",
-        maths10: "",
-        science10: "",
-        hindi10: "",
-        social10: "",
-        physics12: "",
-        chemistry12: "",
-        maths12: ""
-      });
-    } else {
-      const errorData = await res.json();
-      if (errorData.error === "Student already registered") {
-        toast.error("You have already filled the form.");
-            setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        branch: "",
-        english10: "",
-        maths10: "",
-        science10: "",
-        hindi10: "",
-        social10: "",
-        physics12: "",
-        chemistry12: "",
-        maths12: ""
-      });
+      if (res.ok) {
+        toast.success("Form submitted successfully!");
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          branchChoice1: "",
+          branchChoice2: "",
+          english10: "",
+          maths10: "",
+          science10: "",
+          hindi10: "",
+          social10: "",
+          physics12: "",
+          chemistry12: "",
+          maths12: ""
+        });
       } else {
-        toast.error("Submission failed!");
-      }
+        const errorData = await res.json();
+        if (errorData.error === "Student already registered") {
+          toast.error("You have already filled the form.");
+        } else {
+          toast.error("Submission failed!");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -129,48 +132,49 @@ export default function Form() {
     }
   };
 
-  const renderInput = (name: keyof FormData, label: string, type = "text") => (
-    <div className="space-y-2">
-      <Label htmlFor={name}>{label} <span className="text-red-500">*</span></Label>
+  const renderInput = (name: keyof FormData, label: string, type = "text", placeholder?: string) => (
+    <div className="space-y-1">
+      <Label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-slate-200">{label} <span className="text-red-500">*</span></Label>
       <Input
         name={name}
         type={type}
         value={formData[name]}
         onChange={handleChange}
-        placeholder={label}
+        placeholder={placeholder || label}
         required
-        max={type === "number" ? 100 : undefined}
-        className={`transition hover:border-purple-400 hover:ring-purple-300 ${
-          errors[name] ? "border-red-500" : ""
-        }`}
+        className={`text-sm px-3 py-2 rounded-md focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400
+          bg-white text-gray-900 placeholder-gray-400 border border-gray-300
+          dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 dark:border-slate-600
+          ${errors[name] ? "ring-1 ring-red-500 border-red-500" : ""}`}
       />
-      {errors[name] && <p className="text-red-500 text-sm">{errors[name]}</p>}
+      {errors[name] && <p className="text-red-500 text-xs">{errors[name]}</p>}
     </div>
   );
 
   return (
-    <div className="min-h-screen p-6 lg:p-12 bg-gradient-to-br from-purple-900 to-black text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-6 dark:bg-slate-900 dark:text-slate-100">
       <Toaster position="top-right" />
-      <form className="max-w-5xl mx-auto space-y-8">
-        {/* Section 1: Personal Details */}
-        <Card className="bg-white/10 border border-white/20 backdrop-blur-md">
+      <form className="max-w-4xl mx-auto space-y-8">
+        {/* Personal Details */}
+        <Card className="border border-gray-200 shadow-sm bg-white dark:bg-slate-800 dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="text-xl text-white">Personal Details</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-slate-100">Personal Details</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {renderInput("name", "Full Name")}
-            {renderInput("email", "Email", "email")}
-            {renderInput("phone", "Phone Number", "tel")}
-            {renderInput("branch", "Branch Preference")}
+            {renderInput("name", "Full Name", "text", "e.g. Shourya Mittal")}
+            {renderInput("email", "Email", "email", "e.g. shourya@email.com")}
+            {renderInput("phone", "Phone Number", "tel", "e.g. 9876543210")}
+            {renderInput("branchChoice1", "1st Branch Preference", "text", "e.g. CSE")}
+            {renderInput("branchChoice2", "2nd Branch Preference", "text", "e.g. Mechanical")}
           </CardContent>
         </Card>
 
-        {/* Section 2: Class 10 Marks */}
-        <Card className="bg-white/10 border border-white/20 backdrop-blur-md">
+        {/* Class 10 Marks */}
+        <Card className="border border-gray-200 shadow-sm bg-white dark:bg-slate-800 dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="text-xl text-white">Class 10 Marks</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-slate-100">Class 10 Marks</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {renderInput("english10", "English", "number")}
             {renderInput("maths10", "Mathematics", "number")}
             {renderInput("science10", "Science", "number")}
@@ -179,21 +183,26 @@ export default function Form() {
           </CardContent>
         </Card>
 
-        {/* Section 3: Class 12 Marks */}
-        <Card className="bg-white/10 border border-white/20 backdrop-blur-md">
+        {/* Class 12 Marks */}
+        <Card className="border border-gray-200 shadow-sm bg-white dark:bg-slate-800 dark:border-slate-700">
           <CardHeader>
-            <CardTitle className="text-xl text-white">Class 12 Marks</CardTitle>
+            <CardTitle className="text-lg font-semibold text-gray-800 dark:text-slate-100">Class 12 Marks</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {renderInput("physics12", "Physics", "number")}
             {renderInput("chemistry12", "Chemistry", "number")}
             {renderInput("maths12", "Mathematics", "number")}
           </CardContent>
         </Card>
 
+        {/* Submit Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSubmit} type="button" className="hover:scale-105 transition bg-green-600 hover:bg-green-700 text-white">
-            Submit
+          <Button
+            onClick={handleSubmit}
+            type="button"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm transition shadow-sm"
+          >
+            Submit Application
           </Button>
         </div>
       </form>

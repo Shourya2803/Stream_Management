@@ -16,7 +16,8 @@ model Student {
   branchChoice1  String
   branchChoice2  String
   seatAllotted   String?
-  seatAccepted   Boolean       @default(false)
+  seatAccepted   Boolean?
+  seatStatus     SeatStatus    @default(PENDING)
   receiptUrl     String?
   receiptStatus  ReceiptStatus @default(PENDING)
   offerLetterUrl String?
@@ -27,6 +28,15 @@ model Student {
   class10        Class10Marks?
   class12        Class12Marks?
 }
+
+
+
+enum SeatStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 
 model Class10Marks {
   id        String  @id @default(cuid())

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/select";
 
 export default function SeatAllotmentForm({ studentId }: { studentId: string }) {
+  const router = useRouter();
   const [selectedBranch, setSelectedBranch] = useState("");
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
@@ -18,21 +20,24 @@ export default function SeatAllotmentForm({ studentId }: { studentId: string }) 
   } | null>(null);
 
   const handleAllotment = async () => {
-    const res = await fetch(`/api/students/${studentId}`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        seatAllotted: selectedBranch,
-        notification: `You have been allotted ${selectedBranch}`,
-      }),
+    // Use the dedicated allot-seat endpoint which returns the updated student
+    const res = await fetch(`/api/students/${studentId}/allot-seat`, {
+      method: "POST",
+      body: JSON.stringify({ seat: selectedBranch }),
       headers: { "Content-Type": "application/json" },
     });
 
-    if (res.ok) {
+    const data = await res.json().catch(() => null);
+
+    if (res.ok && data) {
       setStatusMessage({
         type: "success",
         text: `✅ Seat allotted: ${selectedBranch}`,
       });
+      // refresh the page to show updated server-rendered student data
+      router.refresh();
     } else {
+      console.error("Allot-seat failed:", data);
       setStatusMessage({
         type: "error",
         text: "❌ Failed to allot seat.",
@@ -49,6 +54,8 @@ export default function SeatAllotmentForm({ studentId }: { studentId: string }) 
         <SelectContent>
           <SelectItem value="CSE">CSE</SelectItem>
           <SelectItem value="ECE">ECE</SelectItem>
+          <SelectItem value="Mechanical">Mechanical</SelectItem>
+          <SelectItem value="Civil">Civil</SelectItem>
         </SelectContent>
       </Select>
 

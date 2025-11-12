@@ -14,19 +14,23 @@ export async function POST(req: Request) {
 
     // ✅ Parse request body
     const body = await req.json();
-    console.log("Received body:", body);
+      // Normalize branch fields: frontend sometimes sends `branchChoice1/2` while other clients
+      // might send `branch1`/`branch2`. Accept both and prefer the explicit branch1/2 if present.
+      const branch1 = body.branch1 ?? body.branchChoice1;
+      const branch2 = body.branch2 ?? body.branchChoice2;
 
-    // ✅ Basic validation
-    const requiredFields = [
-      "name", "email", "phone", "branch",
-      "english10", "maths10", "science10", "hindi10", "social10",
-      "physics12", "chemistry12", "maths12"
-    ];
+      // ✅ Basic validation (handle normalized branch fields)
+      const requiredFields = [
+        "name", "email", "phone",
+        "english10", "maths10", "science10", "hindi10", "social10",
+        "physics12", "chemistry12", "maths12"
+      ];
 
-    const missingFields = requiredFields.filter(f => !body[f]);
-    if (missingFields.length > 0) {
-      return NextResponse.json({ error: `Missing fields: ${missingFields.join(", ")}` }, { status: 400 });
-    }
+      const missingFields = requiredFields.filter((f) => !body[f]);
+      if (!branch1) missingFields.push("branchChoice1 or branch1");
+      if (missingFields.length > 0) {
+        return NextResponse.json({ error: `Missing fields: ${missingFields.join(", ")}` }, { status: 400 });
+      }
 
     // ✅ Check if student already exists
     let existingStudent = await prisma.student.findUnique({
@@ -42,7 +46,8 @@ export async function POST(req: Request) {
     name: body.name,
     email: body.email,
     phone: body.phone,
-    branchChoice1: body.branch,
+    branchChoice1: branch1,
+    branchChoice2: branch2,
 
     class10: {
       upsert: {
@@ -91,8 +96,8 @@ export async function POST(req: Request) {
         name: body.name,
         email: body.email,
         phone: body.phone,
-        branchChoice1: body.branch,
-        branchChoice2: "",
+        branchChoice1: branch1,
+        branchChoice2: branch2,
 
         class10: {
           create: {

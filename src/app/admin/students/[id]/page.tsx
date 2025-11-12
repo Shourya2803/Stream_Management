@@ -80,6 +80,10 @@ export default async function StudentDetailPage({
                 1st Branch Preference: <Badge>{student.branchChoice1}</Badge>
               </p>
               <p className="flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-muted-foreground" />
+                2nd Branch Preference: <Badge>{student.branchChoice2}</Badge>
+              </p>
+              <p className="flex items-center gap-2">
                 <ClipboardList className="w-5 h-5 text-muted-foreground" />
                 Seat Allotted: {
                   student.seatAllotted ? (

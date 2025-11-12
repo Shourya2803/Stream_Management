@@ -17,7 +17,7 @@ export default function ReceiptActionButtons({ studentId }: { studentId: string 
           receiptStatus: status,
           notification:
             status === 'REJECTED'
-              ? 'Your payment receipt has been rejected. Please contact the faculty.'
+              ? 'Your payment receipt has been rejected. Please contact the faculty or upload receipt again.' 
               : null,
         }),
       });

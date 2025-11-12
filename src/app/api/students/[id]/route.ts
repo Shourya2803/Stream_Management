@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma"; // update path if needed
+import prisma from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
@@ -24,34 +24,34 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id } = await params;
   const body = await req.json();
-  
-  // Handle both seatAllotted and seatAccepted fields
-  const { seatAllotted, seatAccepted, notification } = body;
+  const { seatAccepted, notification } = body;
 
   try {
-    // Build the update data object dynamically
-    const updateData: any = {};
-    
-    if (seatAllotted !== undefined) {
-      updateData.seatAllotted = seatAllotted;
+    // Build update payload only with provided fields
+    const data: Record<string, any> = {};
+
+    if (typeof seatAccepted !== "undefined") {
+      data.seatAccepted = seatAccepted;
+      // Keep seatStatus in sync with seatAccepted when provided
+      if (seatAccepted === true) data.seatStatus = "ACCEPTED";
+      else if (seatAccepted === false) data.seatStatus = "REJECTED";
+      else if (seatAccepted === null) data.seatStatus = "PENDING";
     }
-    
-    if (seatAccepted !== undefined) {
-      updateData.seatAccepted = seatAccepted;
-    }
-    
-    if (notification !== undefined) {
-      updateData.notification = notification;
+
+    if (typeof notification !== "undefined") data.notification = notification;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "No updatable fields provided" }, { status: 400 });
     }
 
     const updated = await prisma.student.update({
       where: { id },
-      data: updateData,
+      data,
     });
 
     return NextResponse.json(updated);
