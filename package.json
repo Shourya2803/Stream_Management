@@ -24,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
+    "file-saver": "^2.0.5",
     "framer-motion": "^12.23.6",
     "get-stream": "^9.0.1",
     "jspdf": "^3.0.1",
@@ -41,7 +42,8 @@
     "sooner": "^1.1.4",
     "streamifier": "^0.1.1",
     "tailwind-merge": "^3.3.1",
-    "tesseract.js": "^6.0.1"
+    "tesseract.js": "^6.0.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
