@@ -1,8 +1,8 @@
 // app/api/students/by-branch/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma  from "@/lib/prisma";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { branch } = await req.json();
 

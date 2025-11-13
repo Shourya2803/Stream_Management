@@ -24,11 +24,7 @@ import MarksheetActionButtons from '@/components/MarksheetActionButtons';
 import OfferLetterUpload from "@/components/OfferLetterUpload";
 import { Button } from "@/components/ui/button";
 
-export default async function StudentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 

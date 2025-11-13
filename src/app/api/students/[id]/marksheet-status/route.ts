@@ -3,8 +3,9 @@ import prisma from "@/lib/prisma";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const payload = await req.json();
     // accept payload as { status } or { marksheetStatus }
@@ -21,7 +22,7 @@ export async function PATCH(
       data.notification = 'Your 12th marksheet has been rejected. Please re-upload or contact faculty.';
     }
 
-    const updatedStudent = await prisma.student.update({ where: { id: params.id }, data });
+    const updatedStudent = await prisma.student.update({ where: { id }, data });
 
     return NextResponse.json({ success: true, message: `Marksheet ${status.toLowerCase()} successfully`, student: updatedStudent });
   } catch (err) {

@@ -1,14 +1,14 @@
 // route.ts (e.g., src/app/api/students/[id]/receipt/route.ts)
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma  from "@/lib/prisma"; // Adjust this if needed
 import { Prisma } from "@prisma/client";
 import { ReceiptStatus } from "@prisma/client"; // Ensure this is imported correctly
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const studentId = params.id;
+  const { id: studentId } = await params;
   const { secure_url } = await req.json(); // sent from client after Cloudinary upload
 
   if (!secure_url) {
@@ -34,9 +34,9 @@ export async function POST(
 
 export async function PATCH(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: studentId } = await context.params;
+  const { id: studentId } = await params;
 
   const payload = await req.json();
   const { receiptStatus, notification } = payload;

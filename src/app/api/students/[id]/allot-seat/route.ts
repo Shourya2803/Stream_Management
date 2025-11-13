@@ -1,12 +1,12 @@
 // src/app/api/students/[id]/allot-seat/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   const body = await req.json();
   const seat = body.seat;
 
