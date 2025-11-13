@@ -10,6 +10,10 @@ export async function GET(
   try {
     const student = await prisma.student.findUnique({
       where: { id },
+      include: {
+        class12: true,
+        class10: true,
+      },
     });
 
     if (!student) {
