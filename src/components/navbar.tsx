@@ -233,7 +233,7 @@ export default function Navbar() {
 
   return (
     <motion.header 
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm dark:shadow-lg dark:shadow-black/5"
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-sm dark:shadow-lg dark:shadow-black/5"
       variants={navbarVariants}
       initial="hidden"
       animate="visible"
@@ -251,7 +251,7 @@ export default function Navbar() {
           >
             <div className="relative">
               <motion.div 
-                className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center"
+                className="w-8 h-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center"
                 whileHover={{ 
                   scale: 1.1,
                   boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"
@@ -266,13 +266,13 @@ export default function Navbar() {
                 </motion.div>
               </motion.div>
               <motion.div 
-                className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-20"
+                className="absolute -inset-1 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-20"
                 whileHover={{ opacity: 0.4 }}
                 transition={{ duration: 0.3 }}
               />
             </div>
             <motion.span 
-              className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400"
+              className="text-xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400"
               whileHover={{ 
                 backgroundSize: "200% 100%",
                 backgroundPosition: "100% 0%"
@@ -310,7 +310,7 @@ export default function Navbar() {
             >
               {item.label}
               <motion.div
-                className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                className="absolute -bottom-1 left-0 right-0 h-0.5 bg-linear-to-r from-blue-500 to-purple-600 rounded-full"
                 initial={{ scaleX: 0 }}
                 whileHover={{ scaleX: 1 }}
                 transition={{ duration: 0.3 }}
@@ -391,7 +391,7 @@ export default function Navbar() {
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="w-full hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950 transition-all duration-300"
+                        className="w-full hover:bg-linear-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950 transition-all duration-300"
                         onClick={handleDownloadPDF}
                       >
                         📄 Download Offer Letter
@@ -408,7 +408,7 @@ export default function Navbar() {
                     >
                       <Button
                         size="sm"
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+                        className="w-full bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
                         onClick={handleAccept}
                         disabled={accepting}
                       >
@@ -416,7 +416,7 @@ export default function Navbar() {
                       </Button>
                       <Button
                         size="sm"
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+                        className="w-full bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
                         onClick={handleReject}
                         disabled={rejecting}
                       >
@@ -508,8 +508,8 @@ export default function Navbar() {
                     whileTap={{ scale: 0.95 }}
                   >
                     {item.label}
-                    <motion.div
-                      className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"
+                      <motion.div
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-blue-500 to-purple-600 rounded-full"
                       initial={{ scaleY: 0 }}
                       whileHover={{ scaleY: 1 }}
                       transition={{ duration: 0.3 }}
