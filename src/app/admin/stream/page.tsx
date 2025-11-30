@@ -144,7 +144,7 @@ export default function StreamsPage() {
           )}
 
           {/* Results Section */}
-          {selectedBranch && students.length > 0 && (
+          {selectedBranch && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="px-6 py-4 bg-linear-to-r from-gray-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 border-b border-gray-200 dark:border-gray-600">
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
@@ -154,6 +154,40 @@ export default function StreamsPage() {
                   {students.length} student{students.length !== 1 ? 's' : ''} found
                 </p>
               </div>
+
+              {students.length === 0 ? (
+                <div className="px-6 py-12 text-center">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                  <p className="mt-4 text-lg font-medium text-gray-900 dark:text-white">No students found</p>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">There are no students in the {selectedBranch} branch.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Desktop Table */}
+                  <div className="hidden sm:block overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="bg-linear-to-r from-gray-50 to-blue-50 dark:from-gray-700 dark:to-gray-600">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phone</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {students.map((student: any, index: number) => (
+                          <tr key={student.id || index} className="hover:bg-linear-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 group">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{student.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{student.email}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{student.phone}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
 
               {/* Desktop Table */}
               <div className="hidden sm:block overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
