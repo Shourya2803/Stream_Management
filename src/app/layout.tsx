@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import {Toaster} from 'react-hot-toast'
+import { Toaster as Sonner } from 'sonner'
 
 
 
@@ -39,6 +40,7 @@ export default function RootLayout({
 
        
           <Toaster position="top-right" reverseOrder={false} />
+          <Sonner position="top-right" />
         </ThemeProvider>
       </body>
     </html>
